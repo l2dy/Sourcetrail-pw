@@ -183,7 +183,7 @@ set(Boost_USE_MULTITHREAD ON)
 set(Boost_USE_STATIC_LIBS ON CACHE BOOL "Set to ON to force the use of the static libraries.")
 set(Boost_USE_STATIC_RUNTIME OFF)
 
-find_package(Boost 1.67 COMPONENTS system program_options filesystem date_time REQUIRED)
+find_package(Boost 1.81 COMPONENTS system program_options filesystem date_time REQUIRED)
 
 
 # Qt ---------------------------------------------------------------------------
@@ -407,6 +407,7 @@ if (BUILD_CXX_LANGUAGE_PACKAGE)
                 list(APPEND REQ_LLVM_LIBS "${lib_deps}")
             endif()
         endforeach()
+        set(REQ_LLVM_LIBS "LLVMSupport;LLVMCore;LLVMLibDriver;LLVMPasses;LLVMOption;LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMARMCodeGen;LLVMARMAsmParser;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMVECodeGen;LLVMVEAsmParser;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMX86CodeGen;LLVMX86AsmParser;LLVMNVPTXInfo;clangTidyMain;clangDependencyScanning")
     endif()
 
     if(LLVM_LINK_LLVM_DYLIB)  # Should be CLANG_LINK_CLANG_DYLIB in future LLVM release

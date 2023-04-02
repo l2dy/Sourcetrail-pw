@@ -58,15 +58,15 @@ void PreprocessorCallbacks::InclusionDirective(
 	llvm::StringRef fileName,
 	bool isAngled,
 	clang::CharSourceRange fileNameRange,
-	const clang::FileEntry* fileEntry,
+	llvm::Optional< clang::FileEntryRef > fileEntry,
 	llvm::StringRef searchPath,
 	llvm::StringRef relativePath,
 	const clang::Module* imported,
 	clang::SrcMgr::CharacteristicKind fileType)
 {
-	if (m_currentFileSymbolId && fileEntry)
+	if (m_currentFileSymbolId && fileEntry.hasValue())
 	{
-		const FilePath includedFilePath = m_canonicalFilePathCache->getCanonicalFilePath(fileEntry);
+                const FilePath includedFilePath = m_canonicalFilePathCache->getCanonicalFilePath(fileEntry.value());
 		const NameHierarchy includedFileNameHierarchy(includedFilePath.wstr(), NAME_DELIMITER_FILE);
 
 		Id includedFileSymbolId = m_client->recordSymbol(includedFileNameHierarchy);
