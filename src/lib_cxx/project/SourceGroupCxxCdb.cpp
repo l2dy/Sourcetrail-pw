@@ -101,15 +101,18 @@ std::shared_ptr<IndexerCommandProvider> SourceGroupCxxCdb::getIndexerCommandProv
 
 	for (const clang::tooling::CompileCommand& command: cdb->getAllCompileCommands())
 	{
-		FilePath sourcePath = FilePath(utility::decodeFromUtf8(command.Filename)).makeCanonical();
-		if (!sourcePath.isAbsolute())
-		{
-			sourcePath = FilePath(utility::decodeFromUtf8(command.Directory + '/' + command.Filename))
-							 .makeCanonical();
-			if (!sourcePath.isAbsolute())
-			{
-				sourcePath = cdbPath.getParentDirectory().getConcatenated(sourcePath).makeCanonical();
-			}
+                // (PW)02APR2023 This does not work if there is the same Filename in current directory.
+                //   It will mismatch this file from the expected one in command.Directory, and you
+                //   may end up missing that compiled file in your indexed files..
+		// FilePath sourcePath = FilePath(utility::decodeFromUtf8(command.Filename)).makeCanonical();
+
+                //LOG_INFO("command.Filename " + command.Filename);
+                //LOG_INFO("command.Directory " + command.Directory);
+                //LOG_INFO("sourcePath " + sourcePath.str());
+		FilePath sourcePath = FilePath(utility::decodeFromUtf8(command.Directory + "/" + command.Filename)).makeCanonical();
+                if (!sourcePath.isAbsolute())
+                {
+                        sourcePath = cdbPath.getParentDirectory().getConcatenated(sourcePath).makeCanonical();
 		}
 
 		if (info.filesToIndex.find(sourcePath) != info.filesToIndex.end() &&
@@ -132,7 +135,12 @@ std::shared_ptr<IndexerCommandProvider> SourceGroupCxxCdb::getIndexerCommandProv
 				std::set<FilePathFilter>(),
 				FilePath(utility::decodeFromUtf8(command.Directory)),
 				utility::concat(cdbFlags, compilerFlags)));
-		}
+		} else {
+                    //if (info.filesToIndex.find(sourcePath) == info.filesToIndex.end())
+                    //    LOG_INFO("not in info.filesToIndex sourcePath " + sourcePath.str());
+                    //if (sourceFilePaths.find(sourcePath) == sourceFilePaths.end())
+                    //    LOG_INFO("not in sourceFilePaths sourcePath " + sourcePath.str());
+                }
 	}
 
 	provider->logStats();
