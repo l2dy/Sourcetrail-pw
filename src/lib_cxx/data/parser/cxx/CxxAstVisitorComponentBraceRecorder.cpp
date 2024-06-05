@@ -8,6 +8,8 @@
 #include "ParserClient.h"
 #include "utilityClang.h"
 
+#include <optional>
+
 CxxAstVisitorComponentBraceRecorder::CxxAstVisitorComponentBraceRecorder(
 	CxxAstVisitor* astVisitor, clang::ASTContext* astContext, std::shared_ptr<ParserClient> client)
 	: CxxAstVisitorComponent(astVisitor), m_astContext(astContext), m_client(client)
@@ -153,7 +155,7 @@ clang::SourceLocation CxxAstVisitorComponentBraceRecorder::getFirstLBraceLocatio
 
 	while (true)
 	{
-		llvm::Optional<clang::Token> token = clang::Lexer::findNextToken(searchStartLoc, sm, opts);
+                std::optional<clang::Token> token = clang::Lexer::findNextToken(searchStartLoc, sm, opts);
 		if (token.has_value())
 		{
 			if (token.value().getKind() == clang::tok::l_brace)
@@ -186,7 +188,7 @@ clang::SourceLocation CxxAstVisitorComponentBraceRecorder::getLastRBraceLocation
 
 	{
 		searchEndLoc = searchEndLoc.getLocWithOffset(-1);
-		llvm::Optional<clang::Token> token = clang::Lexer::findNextToken(searchEndLoc, sm, opts);
+		std::optional<clang::Token> token = clang::Lexer::findNextToken(searchEndLoc, sm, opts);
 		if (token.has_value() && token.value().getKind() == clang::tok::r_brace)
 		{
 			return token.value().getLocation();

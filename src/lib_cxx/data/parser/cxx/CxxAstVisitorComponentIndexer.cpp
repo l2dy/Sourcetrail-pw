@@ -16,6 +16,8 @@
 #include "ParserClient.h"
 #include "utilityClang.h"
 
+#include <optional>
+
 CxxAstVisitorComponentIndexer::CxxAstVisitorComponentIndexer(
 	CxxAstVisitor* astVisitor, clang::ASTContext* astContext, std::shared_ptr<ParserClient> client)
 	: CxxAstVisitorComponent(astVisitor), m_astContext(astContext), m_client(client)
@@ -915,7 +917,7 @@ ParseLocation CxxAstVisitorComponentIndexer::getSignatureLocation(clang::Functio
 
 		while (sm.isBeforeInTranslationUnit(endLoc, signatureRange.getEnd()))
 		{
-			llvm::Optional<clang::Token> token = clang::Lexer::findNextToken(endLoc, sm, opts);
+			std::optional<clang::Token> token = clang::Lexer::findNextToken(endLoc, sm, opts);
 			if (token.has_value())
 			{
 				const clang::tok::TokenKind tokenKind = token.value().getKind();
