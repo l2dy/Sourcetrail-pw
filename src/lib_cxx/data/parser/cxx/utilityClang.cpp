@@ -102,7 +102,21 @@ bool utility::isLocalVariable(const clang::VarDecl* d)
 	return false;
 }
 
+bool utility::isLocalVariable(clang::ValueDecl const*d)
+{
+	if (!llvm::isa<clang::ParmVarDecl>(d) && !(d->getParentFunctionOrMethod() == nullptr))
+	{
+		return true;
+	}
+	return false;
+}
+
 bool utility::isParameter(const clang::VarDecl* d)
+{
+	return llvm::isa<clang::ParmVarDecl>(d);
+}
+
+bool utility::isParameter(clang::ValueDecl const* d)
 {
 	return llvm::isa<clang::ParmVarDecl>(d);
 }
