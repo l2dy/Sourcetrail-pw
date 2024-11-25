@@ -270,7 +270,10 @@ bool CxxAstVisitor::TraverseTemplateTypeParmDecl(clang::TemplateTypeParmDecl* d)
 	if (d->hasDefaultArgument() && !d->defaultArgumentWasInherited())
 	{
 		FOREACH_COMPONENT(beginTraverseTemplateDefaultArgumentLoc());
-		TraverseTypeLoc(d->getDefaultArgumentInfo()->getTypeLoc());
+		auto sourceInfo = d->getDefaultArgument().getLocInfo().getAsTypeSourceInfo();
+		if (sourceInfo) {
+			TraverseTypeLoc(sourceInfo->getTypeLoc());
+		}
 		FOREACH_COMPONENT(endTraverseTemplateDefaultArgumentLoc());
 	}
 
@@ -396,18 +399,22 @@ bool CxxAstVisitor::TraverseClassTemplateSpecializationDecl(clang::ClassTemplate
 
 	if (ReturnValue)
 	{
-		if (clang::TypeSourceInfo* TSI = D->getTypeAsWritten())
-		{
-			clang::TypeLoc::TypeLocClass ccccc = TSI->getTypeLoc().getTypeLocClass();
-			const clang::TemplateSpecializationTypeLoc tstl =
-				TSI->getTypeLoc().getAs<clang::TemplateSpecializationTypeLoc>();
-			if (!tstl.isNull())
-			{
-				for (unsigned I = 0, E = tstl.getNumArgs(); I != E; ++I)
-				{
-					if (!TraverseTemplateArgumentLoc(tstl.getArgLoc(I)))
+		clang::CXXRecordDecl* cxxRcd = llvm::dyn_cast<clang::CXXRecordDecl>(D);
+		if (cxxRcd) {
+			if (const clang::Type* tType = cxxRcd->getTypeForDecl()) {
+				if (const clang::TypeSourceInfo* TSI = cxxRcd->getASTContext().getTrivialTypeSourceInfo(clang::QualType(tType, 0))) {
+					clang::TypeLoc::TypeLocClass ccccc = TSI->getTypeLoc().getTypeLocClass();
+					const clang::TemplateSpecializationTypeLoc tstl =
+						TSI->getTypeLoc().getAs<clang::TemplateSpecializationTypeLoc>();
+					if (!tstl.isNull())
 					{
-						ReturnValue = false;
+						for (unsigned I = 0, E = tstl.getNumArgs(); I != E; ++I)
+						{
+							if (!TraverseTemplateArgumentLoc(tstl.getArgLoc(I)))
+							{
+								ReturnValue = false;
+							}
+						}
 					}
 				}
 			}

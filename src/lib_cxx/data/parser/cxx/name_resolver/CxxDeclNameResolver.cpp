@@ -314,7 +314,7 @@ std::unique_ptr<CxxDeclName> CxxDeclNameResolver::getDeclName(const clang::Named
 			clang::isa<clang::NamespaceDecl>(declaration) &&
 			clang::dyn_cast<clang::NamespaceDecl>(declaration)->isAnonymousNamespace())
 		{
-			declaration = clang::dyn_cast<clang::NamespaceDecl>(declaration)->getOriginalNamespace();
+			declaration = clang::dyn_cast<clang::NamespaceDecl>(declaration)->getAnonymousNamespace();
 			return std::make_unique<CxxDeclName>(getNameForAnonymousSymbol(L"namespace", declaration));
 		}
 		else if (clang::isa<clang::EnumDecl>(declaration) && declNameString.empty())
@@ -466,15 +466,17 @@ std::wstring CxxDeclNameResolver::getTranslationUnitMainFileName(const clang::De
 std::wstring CxxDeclNameResolver::getNameForAnonymousSymbol(
 	const std::wstring& symbolKindName, const clang::Decl* declaration)
 {
-	const clang::SourceManager& sourceManager = declaration->getASTContext().getSourceManager();
-	const clang::PresumedLoc& presumedBegin = sourceManager.getPresumedLoc(declaration->getBeginLoc());
+	if (declaration) {
+		const clang::SourceManager& sourceManager = declaration->getASTContext().getSourceManager();
+		const clang::PresumedLoc& presumedBegin = sourceManager.getPresumedLoc(declaration->getBeginLoc());
 
-	if (presumedBegin.isValid())
-	{
-		return L"anonymous " + symbolKindName + L" (" +
-			getCanonicalFilePathCache()->getDeclarationFileName(declaration) + L'<' +
-			std::to_wstring(presumedBegin.getLine()) + L':' +
-			std::to_wstring(presumedBegin.getColumn()) + L">)";
+		if (presumedBegin.isValid())
+		{
+			return L"anonymous " + symbolKindName + L" (" +
+				getCanonicalFilePathCache()->getDeclarationFileName(declaration) + L'<' +
+				std::to_wstring(presumedBegin.getLine()) + L':' +
+				std::to_wstring(presumedBegin.getColumn()) + L">)";
+		}
 	}
 	return L"anonymous " + symbolKindName;
 }

@@ -74,7 +74,7 @@ ClangInvocationInfo ClangInvocationInfo::getClangInvocationString(
 		// Since the input might only be virtual, don't check whether it exists.
 		Driver->setCheckInputsExist(false);
 		const std::unique_ptr<clang::driver::Compilation> Compilation(
-			Driver->BuildCompilation(llvm::makeArrayRef(Argv)));
+			Driver->BuildCompilation(llvm::ArrayRef(Argv)));
 
 		if (Compilation)
 		{

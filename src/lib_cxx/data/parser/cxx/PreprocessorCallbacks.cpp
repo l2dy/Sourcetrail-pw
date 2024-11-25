@@ -62,11 +62,12 @@ void PreprocessorCallbacks::InclusionDirective(
 	llvm::StringRef searchPath,
 	llvm::StringRef relativePath,
 	const clang::Module* imported,
+	bool ModuleImported,
 	clang::SrcMgr::CharacteristicKind fileType)
 {
 	if (m_currentFileSymbolId && fileEntry.has_value())
 	{
-                const FilePath includedFilePath = m_canonicalFilePathCache->getCanonicalFilePath(*fileEntry);
+		const FilePath includedFilePath = m_canonicalFilePathCache->getCanonicalFilePath(&*fileEntry);
 		const NameHierarchy includedFileNameHierarchy(includedFilePath.wstr(), NAME_DELIMITER_FILE);
 
 		Id includedFileSymbolId = m_client->recordSymbol(includedFileNameHierarchy);

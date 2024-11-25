@@ -140,15 +140,15 @@ SymbolKind utility::getSymbolKind(const clang::VarDecl* d)
 	return symbolKind;
 }
 
-std::wstring utility::getFileNameOfFileEntry(const clang::FileEntry* entry)
+std::wstring utility::getFileNameOfFileEntry(const clang::FileEntryRef* entry)
 {
 	std::wstring fileName = L"";
 	if (entry != nullptr)
 	{
-		fileName = utility::decodeFromUtf8(entry->tryGetRealPathName().str());
+		fileName = utility::decodeFromUtf8(entry->getFileEntry().tryGetRealPathName().str());
 		if (fileName.empty())
 		{
-			fileName = utility::decodeFromUtf8(entry->getName().str());
+                    fileName = utility::decodeFromUtf8(entry->getName().str());
 		}
 		else
 		{
