@@ -244,6 +244,17 @@ std::unique_ptr<CxxTypeName> CxxTypeNameResolver::getName(const clang::Type* typ
 			return std::make_unique<CxxTypeName>(
 				L"auto");	 // TODO: can we actually resolve this case? would be great!
 		}
+		case clang::Type::DeducedTemplateSpecialization:
+		{
+			clang::QualType deducedType = clang::dyn_cast<clang::DeducedTemplateSpecializationType>(type)->getDeducedType();
+			if (!deducedType.isNull())
+			{
+				return getName(deducedType);
+			}
+
+			return std::make_unique<CxxTypeName>(
+				L"deducedtemplatespecialization");   // TODO: can we actually resolve this case? would be great!
+		}
 		case clang::Type::Decltype:
 		{
 			return getName(clang::dyn_cast<clang::DecltypeType>(type)->getUnderlyingType());
@@ -272,6 +283,37 @@ std::unique_ptr<CxxTypeName> CxxTypeNameResolver::getName(const clang::Type* typ
 		case clang::Type::Decayed:
 		{
 			return getName(type->getAs<clang::AdjustedType>()->getOriginalType());
+		}
+		case clang::Type::TypeOfExpr:
+		{
+			if (const clang::TypeOfExprType *tOfExp = clang::dyn_cast<clang::TypeOfExprType>(type)) {
+				const clang::Expr *expr = tOfExp->getUnderlyingExpr();
+				clang::QualType exprType = expr->getType();
+				return getName(exprType);
+			}
+			break;
+		}
+		case clang::Type::Using:
+		{
+			if (const clang::UsingType *uType = dyn_cast<clang::UsingType>(type)) {
+				clang::QualType underlyingType = uType->getUnderlyingType();
+				return getName(underlyingType);
+			}
+			break;
+		}
+		case clang::Type::UnresolvedUsing:
+		{
+			if (const clang::UnresolvedUsingType *uType = dyn_cast<clang::UnresolvedUsingType>(type)) {
+				const clang::UnresolvedUsingTypenameDecl *decl = uType->getDecl();
+				if (decl) {
+					std::unique_ptr<CxxDeclName> declName = CxxDeclNameResolver(this).getName(decl);
+					if (declName) {
+						return std::make_unique<CxxTypeName>(
+							declName->getName(), std::vector<std::wstring>(), declName->getParent());
+					}
+				}
+			}
+			// fall-below
 		}
 		default:
 		{
